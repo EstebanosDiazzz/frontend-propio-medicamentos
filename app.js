@@ -12,20 +12,6 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const practitionerId = document.getElementById('practitionerId').value;
 
     // Crear el objeto MedicationAdministration en formato FHIR
-  document.getElementById('medicationAdministrationForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    // Obtener los valores del formulario
-    const patientId = document.getElementById('patientId').value;
-    const medicationCode = document.getElementById('medicationCode').value;
-    const medicationDisplay = document.getElementById('medicationDisplay').value;
-    const status = document.getElementById('status').value; 
-    const effectiveDateTime = document.getElementById('effectiveDateTime').value;
-    const doseValue = parseFloat(document.getElementById('doseValue').value);
-    const route = document.getElementById('route').value;
-    const practitionerId = document.getElementById('practitionerId').value;
-
-    // Crear el objeto MedicationAdministration en formato FHIR
     const medicationAdministration = {
         resourceType: "MedicationAdministration",
         status: status,
@@ -84,4 +70,3 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
         alert('Hubo un error al registrar la administración del medicamento.');
     });
 });  // Asegúrate de que esta llave cierre correctamente
-
