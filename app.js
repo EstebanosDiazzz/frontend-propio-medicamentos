@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("medicationAdministrationForm");
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -15,21 +16,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const practitionerId   = document.getElementById("practitionerId").value;
 
     // 2) Convertir fecha a ISO (añadiendo segundos y Z)
-    let occurrenceDateTime = null;
-    if (rawDate) {
-      const dateWithSeconds = rawDate + ":00Z";              // "YYYY-MM-DDTHH:mm:00Z"
-      const d = new Date(dateWithSeconds);
-      if (!isNaN(d)) occurrenceDateTime = d.toISOString();
-      else {
-        alert("Fecha inválida");
-        return;
-      }
-    } else {
-      alert("Fecha requerida");
+    if (!rawDate) {
+      alert("Debes indicar fecha y hora.");
       return;
     }
+    const dateWithSeconds = rawDate + ":00Z";              // "YYYY-MM-DDTHH:mm:00Z"
+    const d = new Date(dateWithSeconds);
+    if (isNaN(d)) {
+      alert("Formato de fecha inválido.");
+      return;
+    }
+    const occurenceDateTime = d.toISOString();             // <-- typo intencional
 
-    // 3) Construir recurso FHIR válido
+    // 3) Construir recurso FHIR según lo que espera el backend
     const medAdmin = {
       resourceType: "MedicationAdministration",
       status: status,
@@ -44,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       subject: {
         reference: `Patient/${patientId}`
       },
-      occurrenceDateTime: occurrenceDateTime,
+      occurenceDateTime: occurenceDateTime,  // <-- aquí el typo que el backend requiere
       performer: [{
         actor: {
           reference: `Practitioner/${practitionerId}`
@@ -84,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.detail || res.status));
       }
     } catch (err) {
-      console.error(err);
+      console.error("Fetch falló:", err);
       alert("No se pudo conectar con el servidor.");
     }
   });
