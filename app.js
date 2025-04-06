@@ -1,74 +1,59 @@
-document.getElementById("medicationAdministrationForm").addEventListener("submit", async function (event) {
-    event.preventDefault();  // Prevenir el envío tradicional del formulario
+document.getElementById("medicationAdministrationForm").addEventListener("submit", function (e) {
+    e.preventDefault();  // Prevenir el envío del formulario para manejarlo con JavaScript
 
+    // Recolectar los datos del formulario
     const patientId = document.getElementById("patientId").value;
     const medicationCode = document.getElementById("medicationCode").value;
     const medicationDisplay = document.getElementById("medicationDisplay").value;
     const status = document.getElementById("status").value;
+    
+    // Obtener el valor de effectiveDateTime y asegurarse de que sea válido
     const effectiveDateTime = document.getElementById("effectiveDateTime").value;
+    let occurrenceDateTime = null;
+    
+    if (effectiveDateTime) {
+        // Agregar ":00" al final para incluir los segundos en el formato
+        const dateWithSeconds = `${effectiveDateTime}:00`;
+        occurrenceDateTime = new Date(dateWithSeconds).toISOString();
+    } else {
+        console.error("Fecha inválida");
+    }
+
     const doseValue = document.getElementById("doseValue").value;
     const route = document.getElementById("route").value;
     const practitionerId = document.getElementById("practitionerId").value;
 
-    const occurrenceDateTime = new Date(effectiveDateTime).toISOString();  // Asegúrate de que esté en formato ISO
-
-    const medicationAdministration = {
-        resourceType: "MedicationAdministration",
-        status: status,
-        medication: { 
-            code: {
-                coding: [{
-                    system: "http://www.nlm.nih.gov/research/umls/rxnorm",
-                    code: medicationCode,
-                    display: medicationDisplay
-                }],
-                text: medicationDisplay
-            }
-        },
-        subject: {
-            reference: `Patient/${patientId}`
-        },
-        occurrenceDateTime: occurrenceDateTime,  // Usa el nombre correcto
-        performer: [{
-            actor: {
-                reference: `Practitioner/${practitionerId}`
-            }
-        }],
-        dosage: {
-            text: `${doseValue} mg vía ${route}`,
-            route: {
-                coding: [{
-                    system: "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
-                    code: route,
-                    display: document.querySelector(`#route option[value="${route}"]`).textContent
-                }]
-            },
-            dose: {
-                value: doseValue,
-                unit: "mg",
-                system: "http://unitsofmeasure.org",
-                code: "mg"
-            }
-        }
+    // Crear el objeto para enviar al backend
+    const medicationAdministrationData = {
+        patientId,
+        medicationCode,
+        medicationDisplay,
+        status,
+        effectiveDateTime: occurrenceDateTime,  // Usar la fecha con el formato correcto
+        doseValue,
+        route,
+        practitionerId
     };
 
-    try {
-        const response = await fetch("https://backend-propio-0z5h.onrender.com/medication_administration", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(medicationAdministration)
-        });
-
+    // Enviar la solicitud POST al backend
+    fetch("https://backend-propio-0z5h.onrender.com/medication_administration", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(medicationAdministrationData)
+    })
+    .then(response => {
         if (response.ok) {
-            const data = await response.json();
-            console.log("Registro exitoso:", data);
+            return response.json();
         } else {
-            const errorData = await response.json();
-            console.error("Error al registrar:", errorData);
+            throw new Error("Error en la solicitud");
         }
-    } catch (error) {
-        console.error("Error en la solicitud:", error);
-    }
+    })
+    .then(data => {
+        console.log("Éxito:", data);
+    })
+    .catch(error => {
+        console.error("Error al registrar la administración de medicamento:", error);
+    });
 });
