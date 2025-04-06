@@ -10,13 +10,22 @@ document.getElementById("medicationAdministrationForm").addEventListener("submit
     // Obtener el valor de effectiveDateTime y asegurarse de que sea válido
     const effectiveDateTime = document.getElementById("effectiveDateTime").value;
     let occurrenceDateTime = null;
-    
+
+    console.log("Fecha de administración recibida:", effectiveDateTime);  // Depuración
+
     if (effectiveDateTime) {
         // Agregar ":00" al final para incluir los segundos en el formato
         const dateWithSeconds = `${effectiveDateTime}:00`;
-        occurrenceDateTime = new Date(dateWithSeconds).toISOString();
+        
+        // Verificar si la fecha es válida
+        const validDate = new Date(dateWithSeconds);
+        if (!isNaN(validDate.getTime())) {
+            occurrenceDateTime = validDate.toISOString();
+        } else {
+            console.error("Fecha inválida:", dateWithSeconds);
+        }
     } else {
-        console.error("Fecha inválida");
+        console.error("Fecha no proporcionada");
     }
 
     const doseValue = document.getElementById("doseValue").value;
