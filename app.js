@@ -12,46 +12,43 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const practitionerId = document.getElementById('practitionerId').value;
 
     // Crear el objeto MedicationAdministration en formato FHIR
-const medicationAdministration = {
-    resourceType: "MedicationAdministration",
-    status: status,
-    medication: {
-        code: {
+    const medicationAdministration = {
+        resourceType: "MedicationAdministration",
+        status: status,
+        medicationCodeableConcept: {  // Cambié 'medication' por 'medicationCodeableConcept'
             coding: [{
                 system: "http://www.nlm.nih.gov/research/umls/rxnorm",
                 code: medicationCode,
                 display: medicationDisplay
             }],
             text: medicationDisplay
-        }
-    },
-    subject: {
-        reference: `Patient/${patientId}`
-    },
-    occurenceDateTime: effectiveDateTime,  // Cambié este campo para que coincida con lo esperado por el backend
-    performer: [{
-        actor: {
-            reference: `Practitioner/${practitionerId}`
-        }
-    }],
-    dosage: {
-        text: `${doseValue} mg vía ${route}`,
-        route: {
-            coding: [{
-                system: "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
-                code: route,
-                display: document.querySelector(`#route option[value="${route}"]`).textContent
-            }]
         },
-        dose: {
-            value: doseValue,
-            unit: "mg",
-            system: "http://unitsofmeasure.org",
-            code: "mg"
+        subject: {
+            reference: `Patient/${patientId}`  // Asegúrate de que el patientId sea válido
+        },
+        occurrenceDateTime: effectiveDateTime,  // Cambié 'effectiveDateTime' por 'occurrenceDateTime'
+        performer: [{
+            actor: {
+                reference: `Practitioner/${practitionerId}`  // Asegúrate de que el practitionerId sea válido
+            }
+        }],
+        dosage: {
+            text: `${doseValue} mg vía ${route}`,
+            route: {
+                coding: [{
+                    system: "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
+                    code: route,
+                    display: document.querySelector(`#route option[value="${route}"]`).textContent
+                }]
+            },
+            dose: {
+                value: doseValue,
+                unit: "mg",
+                system: "http://unitsofmeasure.org",
+                code: "mg"
+            }
         }
-    }
-};
-
+    };
 
     // Enviar los datos usando Fetch API
     fetch('https://backend-propio-0z5h.onrender.com/medication_administration', {
@@ -61,12 +58,7 @@ const medicationAdministration = {
         },
         body: JSON.stringify(medicationAdministration)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al registrar la administración de medicamento');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         console.log('Éxito:', data);
         alert('Administración de medicamento registrada exitosamente.');
