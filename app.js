@@ -6,7 +6,7 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const medicationCode = document.getElementById('medicationCode').value;
     const medicationDisplay = document.getElementById('medicationDisplay').value;
     const status = document.getElementById('status').value; 
-    const effectiveDateTime = document.getElementById('effectiveDateTime').value;
+    const occurrenceDateTime = document.getElementById('occurrenceDateTime').value;  // Asegúrate de tener el campo correcto
     const doseValue = parseFloat(document.getElementById('doseValue').value);
     const route = document.getElementById('route').value;
     const practitionerId = document.getElementById('practitionerId').value;
@@ -15,21 +15,23 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const medicationAdministration = {
         resourceType: "MedicationAdministration",
         status: status,
-        medicationCodeableConcept: {  // Cambié 'medication' por 'medicationCodeableConcept'
-            coding: [{
-                system: "http://www.nlm.nih.gov/research/umls/rxnorm",
-                code: medicationCode,
-                display: medicationDisplay
-            }],
-            text: medicationDisplay
+        medication: { 
+            code: {
+                coding: [{
+                    system: "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    code: medicationCode,
+                    display: medicationDisplay
+                }],
+                text: medicationDisplay
+            }
         },
         subject: {
-            reference: `Patient/${patientId}`  // Asegúrate de que el patientId sea válido
+            reference: `Patient/${patientId}`
         },
-        occurrenceDateTime: effectiveDateTime,  // Cambié 'effectiveDateTime' por 'occurrenceDateTime'
+        occurrenceDateTime: occurrenceDateTime,  // Asegúrate de enviar esto como "occurrenceDateTime"
         performer: [{
             actor: {
-                reference: `Practitioner/${practitionerId}`  // Asegúrate de que el practitionerId sea válido
+                reference: `Practitioner/${practitionerId}`
             }
         }],
         dosage: {
@@ -50,21 +52,24 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
         }
     };
 
-    // Enviar los datos usando Fetch API
+    // Enviar los datos al backend
     fetch('https://backend-propio-0z5h.onrender.com/medication_administration', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/fhir+json'
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify(medicationAdministration)
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Éxito:', data);
-        alert('Administración de medicamento registrada exitosamente.');
+        if (data._id) {
+            alert('¡Medicación registrada correctamente!');
+        } else {
+            alert('Error al registrar la medicación.');
+        }
     })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Hubo un error al registrar la administración del medicamento.');
+    .catch(error => {
+        console.error('Error al registrar la medicación:', error);
+        alert('Hubo un problema al registrar la medicación.');
     });
 });
