@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       occurenceDateTime: isoDate,   // Campo con typo que el backend valida
       performer: [{
-        actor: { reference: `Practitioner/${practitionerId}` }
+        actor: { reference: `Practitioner/${practitionerId}` }  // Asegúrate de que esto sea un string correcto
       }],
       dosage: {
         route: {
