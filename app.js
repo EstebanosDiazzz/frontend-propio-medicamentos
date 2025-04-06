@@ -5,7 +5,7 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const patientId = document.getElementById('patientId').value;
     const medicationCode = document.getElementById('medicationCode').value;
     const medicationDisplay = document.getElementById('medicationDisplay').value;
-    const status = document.getElementById('status').value;
+    const status = document.getElementById('status').value; 
     const effectiveDateTime = document.getElementById('effectiveDateTime').value;
     const doseValue = parseFloat(document.getElementById('doseValue').value);
     const route = document.getElementById('route').value;
