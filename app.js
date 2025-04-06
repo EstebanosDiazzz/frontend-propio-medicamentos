@@ -51,7 +51,7 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     };
 
     // Enviar los datos usando Fetch API
-    fetch('https://backend-propio-0z5h.onrender.com/medication_administration', {
+    fetch('https://backend-propio-0z5h.onrender.com', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/fhir+json'
