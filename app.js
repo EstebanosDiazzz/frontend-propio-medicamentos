@@ -3,25 +3,33 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // 1) Obtener valores del formulario
-    const patientId       = document.getElementById("patientId").value;
-    const medicationCode  = document.getElementById("medicationCode").value;
-    const medicationDisplay = document.getElementById("medicationDisplay").value;
-    const status          = document.getElementById("status").value;
-    const rawDate         = document.getElementById("effectiveDateTime").value; // "YYYY-MM-DDTHH:mm"
-    const doseValue       = parseFloat(document.getElementById("doseValue").value);
-    const route           = document.getElementById("route").value;
-    const practitionerId  = document.getElementById("practitionerId").value;
+    // 1) Leer valores del formulario
+    const patientId        = document.getElementById("patientId").value;
+    const medicationCode   = document.getElementById("medicationCode").value;
+    const medicationDisplay= document.getElementById("medicationDisplay").value;
+    const status           = document.getElementById("status").value;
+    const rawDate          = document.getElementById("effectiveDateTime").value; // "YYYY-MM-DDTHH:mm"
+    const doseValue        = parseFloat(document.getElementById("doseValue").value);
+    const route            = document.getElementById("route").value;
+    const routeDisplay     = document.querySelector(`#route option[value="${route}"]`).textContent;
+    const practitionerId   = document.getElementById("practitionerId").value;
 
-    // 2) Convertir a ISO y corregir typo de la librería (un solo 'r')
+    // 2) Convertir fecha a ISO (añadiendo segundos y Z)
     let occurrenceDateTime = null;
     if (rawDate) {
-      // Añadimos segundos y Z para UTC
-      const iso = new Date(rawDate + ":00Z").toISOString();
-      occurrenceDateTime = iso;
+      const dateWithSeconds = rawDate + ":00Z";              // "YYYY-MM-DDTHH:mm:00Z"
+      const d = new Date(dateWithSeconds);
+      if (!isNaN(d)) occurrenceDateTime = d.toISOString();
+      else {
+        alert("Fecha inválida");
+        return;
+      }
+    } else {
+      alert("Fecha requerida");
+      return;
     }
 
-    // 3) Construir recurso FHIR
+    // 3) Construir recurso FHIR válido
     const medAdmin = {
       resourceType: "MedicationAdministration",
       status: status,
@@ -36,20 +44,18 @@ document.addEventListener("DOMContentLoaded", () => {
       subject: {
         reference: `Patient/${patientId}`
       },
-      // Nota: la librería está esperando 'occurenceDateTime' (sin doble 'r')
-      occurenceDateTime: occurrenceDateTime,
+      occurrenceDateTime: occurrenceDateTime,
       performer: [{
         actor: {
           reference: `Practitioner/${practitionerId}`
         }
       }],
       dosage: {
-        text: `${doseValue} mg vía ${route}`,
         route: {
           coding: [{
             system: "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
             code: route,
-            display: document.querySelector(`#route option[value="${route}"]`).textContent
+            display: routeDisplay
           }]
         },
         dose: {
@@ -75,12 +81,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.ok) {
         alert("Administración registrada con ID: " + data._id);
       } else {
-        console.error("Backend respondió error:", data);
-        alert("Error al registrar: " + data.detail);
+        alert("Error: " + (data.detail || res.status));
       }
     } catch (err) {
-      console.error("Fetch falló:", err);
-      alert("No se pudo conectar con el backend.");
+      console.error(err);
+      alert("No se pudo conectar con el servidor.");
     }
   });
 });
