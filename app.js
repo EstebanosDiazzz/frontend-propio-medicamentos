@@ -15,39 +15,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const routeDisplay     = document.querySelector(`#route option[value="${route}"]`).textContent;
     const practitionerId   = document.getElementById("practitionerId").value;
 
-    // 2) Convertir fecha a ISO (añadiendo segundos y Z)
+    // 2) Convertir fecha a ISO completo
     if (!rawDate) {
-      alert("Debes indicar fecha y hora.");
-      return;
+      return alert("Debes indicar fecha y hora.");
     }
-    const dateWithSeconds = rawDate + ":00Z";              // "YYYY-MM-DDTHH:mm:00Z"
-    const d = new Date(dateWithSeconds);
-    if (isNaN(d)) {
-      alert("Formato de fecha inválido.");
-      return;
+    const isoDate = new Date(rawDate + ":00Z").toISOString(); // Añade segundos y Z
+    if (isNaN(Date.parse(isoDate))) {
+      return alert("Formato de fecha inválido.");
     }
-    const occurenceDateTime = d.toISOString();             // <-- typo intencional
 
-    // 3) Construir recurso FHIR según lo que espera el backend
+    // 3) Construir recurso FHIR
     const medAdmin = {
       resourceType: "MedicationAdministration",
       status: status,
-      medicationCodeableConcept: {
-        coding: [{
-          system: "http://www.nlm.nih.gov/research/umls/rxnorm",
-          code: medicationCode,
-          display: medicationDisplay
-        }],
-        text: medicationDisplay
-      },
-      subject: {
-        reference: `Patient/${patientId}`
-      },
-      occurenceDateTime: occurenceDateTime,  // <-- aquí el typo que el backend requiere
-      performer: [{
-        actor: {
-          reference: `Practitioner/${practitionerId}`
+      subject: { reference: `Patient/${patientId}` },
+      medication: {
+        concept: {
+          coding: [{
+            system: "http://www.nlm.nih.gov/research/umls/rxnorm",
+            code: medicationCode,
+            display: medicationDisplay
+          }],
+          text: medicationDisplay
         }
+      },
+      occurenceDateTime: isoDate,   // Campo con typo que el backend valida
+      performer: [{
+        actor: { reference: `Practitioner/${practitionerId}` }
       }],
       dosage: {
         route: {
@@ -83,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Error: " + (data.detail || res.status));
       }
     } catch (err) {
-      console.error("Fetch falló:", err);
+      console.error(err);
       alert("No se pudo conectar con el servidor.");
     }
   });
