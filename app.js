@@ -15,7 +15,7 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
     const medicationAdministration = {
         resourceType: "MedicationAdministration",
         status: status,
-        medication: {  // Aquí estamos usando el campo 'medication' en lugar de 'medicationCodeableConcept'
+        medication: {
             code: {
                 coding: [{
                     system: "http://www.nlm.nih.gov/research/umls/rxnorm",
@@ -52,7 +52,7 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
         }
     };
 
-    // Aquí envías el fetch como en tu código original
+    // Enviar los datos usando Fetch API
     fetch('https://backend-propio-0z5h.onrender.com/medication_administration', {
         method: 'POST',
         headers: {
@@ -60,7 +60,12 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
         },
         body: JSON.stringify(medicationAdministration)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al registrar la administración de medicamento');
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Éxito:', data);
         alert('Administración de medicamento registrada exitosamente.');
@@ -69,4 +74,4 @@ document.getElementById('medicationAdministrationForm').addEventListener('submit
         console.error('Error:', error);
         alert('Hubo un error al registrar la administración del medicamento.');
     });
-});  // Asegúrate de que esta llave cierre correctamente
+});
