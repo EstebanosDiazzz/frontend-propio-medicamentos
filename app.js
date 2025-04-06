@@ -32,13 +32,13 @@ document.getElementById("medicationAdministrationForm").addEventListener("submit
     const route = document.getElementById("route").value;
     const practitionerId = document.getElementById("practitionerId").value;
 
-    // Crear el objeto para enviar al backend
+    // Crear el objeto para enviar al backend (aquí cambiamos effectiveDateTime a occurenceDateTime)
     const medicationAdministrationData = {
         patientId,
         medicationCode,
         medicationDisplay,
         status,
-        effectiveDateTime: occurrenceDateTime,  // Usar la fecha con el formato correcto
+        occurenceDateTime: occurrenceDateTime,  // Cambiado a occurenceDateTime
         doseValue,
         route,
         practitionerId
